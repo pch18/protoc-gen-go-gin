@@ -2,8 +2,6 @@ package main
 
 import (
 	"net/http"
-	"regexp"
-	"strings"
 
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -85,7 +83,7 @@ func genMethod(m *protogen.Method) []*method {
 func defaultMethod(m *protogen.Method) *method {
 	var (
 		httpMethod = http.MethodPost
-		path       = m.GoName
+		path       = "/" + m.GoName
 	)
 
 	md := buildMethodDesc(m, httpMethod, path)
@@ -134,14 +132,4 @@ func buildMethodDesc(m *protogen.Method, httpMethod, path string) *method {
 	}
 	md.initPathParams()
 	return md
-}
-
-var matchFirstCap = regexp.MustCompile("([A-Z])([A-Z][a-z])")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
-
-func toSnakeCase(input string) string {
-	output := matchFirstCap.ReplaceAllString(input, "${1}_${2}")
-	output = matchAllCap.ReplaceAllString(output, "${1}_${2}")
-	output = strings.ReplaceAll(output, "-", "_")
-	return strings.ToLower(output)
 }
