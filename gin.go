@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -33,7 +34,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the mohuishou/protoc-gen-go-gin package it is being compiled against.")
 	// g.P("// ", contextPkg.Ident(""), metadataPkg.Ident(""))
-	g.P("//", ginPkg.Ident(""), errPkg.Ident(""))
+	g.P("// ", ginPkg.Ident(""), errPkg.Ident(""))
 	g.P()
 
 	for _, service := range file.Services {
@@ -83,7 +84,7 @@ func genMethod(m *protogen.Method) []*method {
 func defaultMethod(m *protogen.Method) *method {
 	var (
 		httpMethod = http.MethodPost
-		path       = "/" + m.GoName
+		path       = fmt.Sprintf("/%v/%v", m.Parent.GoName, m.GoName)
 	)
 
 	md := buildMethodDesc(m, httpMethod, path)
