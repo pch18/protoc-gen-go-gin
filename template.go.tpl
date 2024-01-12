@@ -1,3 +1,13 @@
+
+var marshaler = protojson.MarshalOptions{
+	UseProtoNames:   true,
+	EmitUnpopulated: true,
+}
+var unmarshaler = protojson.UnmarshalOptions{
+	AllowPartial:false,
+	DiscardUnknown:true,
+}
+
 type {{ $.InterfaceName }} interface {
 {{range .MethodSet}}
 	{{.Name}}(ctx *gin.Context, in *{{.Request}}) (*{{.Reply}}, error)
@@ -78,40 +88,31 @@ func (resp default{{$.Name}}Resp) Success(ctx *gin.Context, data interface{}) {
 {{range .Methods}}
 func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 	var in {{.Request}}
-{{if .HasPathParams }}
-	if err := ctx.ShouldBindUri(&in); err != nil {
+
+	reqRaw,err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
 		s.resp.ParamsError(ctx, err)
 		return
 	}
-{{end}}
-{{if eq .Method "GET" "DELETE" }}
-	if err := ctx.ShouldBindQuery(&in); err != nil {
+	err = unmarshaler.Unmarshal(reqRaw, &in)
+	if err != nil {
 		s.resp.ParamsError(ctx, err)
 		return
 	}
-{{else if eq .Method "POST" "PUT" }}
-	if err := ctx.ShouldBindJSON(&in); err != nil {
-		s.resp.ParamsError(ctx, err)
-		return
-	}
-{{else}}
-	if err := ctx.ShouldBind(&in); err != nil {
-		s.resp.ParamsError(ctx, err)
-		return
-	}
-{{end}}
-	// md := metadata.New(nil)
-	// for k, v := range ctx.Request.Header {
-	// 	md.Set(k, v...)
-	// }
-	// newCtx := metadata.NewIncomingContext(ctx, md)
-	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(ctx, &in)
+	
+	out, err = s.server.({{ $.InterfaceName }}).{{.Name}}(ctx, &in)
 	if err != nil {
 		s.resp.Error(ctx, err)
 		return
 	}
 
-	s.resp.Success(ctx, out)
+	var jsonRaw json.RawMessage
+	jsonRaw, err = marshaler.Marshal(out)
+	if err != nil {
+		s.resp.Error(ctx, err)
+		return
+	}
+	s.resp.Success(ctx, jsonRaw)
 }
 {{end}}
 
