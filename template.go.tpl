@@ -100,7 +100,7 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 		return
 	}
 	
-	out, err = s.server.({{ $.InterfaceName }}).{{.Name}}(ctx, &in)
+	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(ctx, &in)
 	if err != nil {
 		s.resp.Error(ctx, err)
 		return
