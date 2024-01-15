@@ -2,6 +2,7 @@
 var marshaler = protojson.MarshalOptions{
 	UseProtoNames:   true,
 	EmitUnpopulated: true,
+	UseEnumNumbers:  true,
 }
 var unmarshaler = protojson.UnmarshalOptions{
 	AllowPartial:false,
@@ -47,7 +48,7 @@ func (resp default{{$.Name}}Resp) response(ctx *gin.Context, status, code int, m
 func (resp default{{$.Name}}Resp) Error(ctx *gin.Context, err error) {
 	code := -1
 	status := 500
-	msg := "未知错误"
+	msg := "InternalError"
 	
 	if err == nil {
 		msg += ", err is nil"
@@ -76,12 +77,12 @@ func (resp default{{$.Name}}Resp) Error(ctx *gin.Context, err error) {
 // ParamsError 参数错误
 func (resp default{{$.Name}}Resp) ParamsError (ctx *gin.Context, err error) {
 	_ = ctx.Error(err)
-	resp.response(ctx, 400, 400, "参数错误", nil)
+	resp.response(ctx, 400, 400, "ParamsError", nil)
 }
 
 // Success 返回成功信息
 func (resp default{{$.Name}}Resp) Success(ctx *gin.Context, data interface{}) {
-	resp.response(ctx, 200, 0, "成功", data)
+	resp.response(ctx, 200, 0, "Success", data)
 }
 
 
