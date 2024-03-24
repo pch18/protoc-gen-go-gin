@@ -2,7 +2,7 @@
 var marshaler = protojson.MarshalOptions{
 	UseProtoNames:   true,
 	EmitUnpopulated: true,
-	// UseEnumNumbers:  true,
+	UseEnumNumbers:  true,
 }
 var unmarshaler = protojson.UnmarshalOptions{
 	AllowPartial:false,
